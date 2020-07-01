@@ -16,7 +16,7 @@ This was created for three reasons:
 3. Square does not have a module for osCommerce.
 
 ## Requirements:
- - PHP 5.6 or higher
+ - PHP 7.1 or higher
  - OpenSSL Extension 
  - osCommerce Online Merchant v2.2 or v2.3
  - SSL installed on your website
