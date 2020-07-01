@@ -1,0 +1,238 @@
+<html>
+<head>
+<title>Square Payments Plugin for osCommerce</title>
+
+<style>
+textarea {
+width:800px;
+height:300px;
+}
+
+h1 {
+font-size:28px;
+font-family: Arial, sans-serif;
+line-height:30px;
+}
+
+h2, p, b, em, pre, strong {
+font-family: Arial, sans-serif;
+line-height:1.5em;
+}
+
+.small {
+font-size:11px;
+}
+
+.highlight {
+color: #0000ff;
+font-family: "Courier New", sans-serif;
+font-size:16px;
+vertical-align:top;
+font-weight:bold;
+}
+
+
+.exitSignature {
+font-size:12px;
+font-family:arial, sans-serif;
+padding:20px 0 30px;
+float:left;
+font-weight:bold;
+}
+
+.exitSignature a {
+color:#0000ff;
+text-decoration: none;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<h1>Square Payments for osCommerce v1.0</h1>
+<b><em>Developed by Hichem Khayati</em> (square@hichemkhayati.com)</b><br/>
+
+<p>The plugin was tested and confirmed to be compatible with osCommerce 2.2, 2.3.4 and 2.3.4.4 <br/>
+It should be compatible with other versions as well, as long as they are not heavily modded.<br/><br/>
+
+<strong>Disclaimer:</strong> This plugin is developed by a 3rd party developer and is not affiliated with Square, Inc.
+
+
+</p>
+
+<h2>Square Payments Installation Guide</h2>
+
+<pre>
+
+
+<b>0)</b> Please back up your files before proceeding, unless you know what you are doing.
+
+<b>1)</b> Upload the files and directories in the "catalog" directory to your server maintaining the directory structure of osCommerce.
+<span class="small">These are all new files and will not affect your osCommerce installation.</span>
+
+<b>2) catalog/includes/template_bottom.php</b> 
+
+Right before the end of the file, find <span class="highlight">&lt;/body&gt;</span>.
+Above it, add the code below.
+<textarea readonly>
+
+
+<?php
+      // SQUARE INSTALLATION 
+      if (isset($payment) && $payment == MODULE_PAYMENT_SQUARE_TEXT_CODE) {
+        
+        $applicationID_query = tep_db_query("select configuration_value from configuration where configuration_key = 'MODULE_PAYMENT_SQUARE_APPLICATION_ID'");
+        $applicationID = tep_db_fetch_array($applicationID_query)['configuration_value'];
+        
+      ?>
+      <script type="text/javascript" src="https://js.squareup.com/v2/paymentform"></script>
+      <script type="text/javascript">
+        var sqPaymentForm = new SqPaymentForm({
+          
+          applicationId: '<?php echo $applicationID ?>',
+          inputClass: 'sq-input',
+          cardNumber: {
+            elementId: 'sq-card-number',
+            placeholder: "0000 0000 0000 0000"
+          },
+          cvv: {
+            elementId: 'sq-cvv',
+            placeholder: 'CVV'
+          },
+          expirationDate: {
+            elementId: 'sq-expiration-date',
+            placeholder: 'MM/YY'
+          },
+          postalCode: {
+            elementId: 'sq-postal-code',
+            placeholder: 'Postal Code'
+          },
+          inputStyles: [
+          
+          // Because this object provides no value for mediaMaxWidth or mediaMinWidth,
+          // these styles apply for screens of all sizes, unless overridden by another
+          // input style below.
+          {
+            fontSize: '14px',
+            padding: '3px'
+          },
+          
+          // These styles are applied to inputs ONLY when the screen width is 400px
+          // or smaller. Note that because it doesn't specify a value for padding,
+          // the padding value in the previous object is preserved.
+          {
+            mediaMaxWidth: '400px',
+            fontSize: '18px',
+          }
+          ],
+          callbacks: {
+            cardNonceResponseReceived: function(errors, nonce, cardData) {
+              if (errors) {
+                var errorDiv = document.getElementById('errors');
+                var finalMsg = '<span style="display: block;padding:5px 10px;" class="stockWarning">';
+                errorDiv.innerHTML = '';
+                errors.forEach(function(error) {
+                  finalMsg +=  error.message + ".<br/>";
+                });
+                finalMsg += '</span>';
+                errorDiv.innerHTML = finalMsg;
+                
+                } else {
+                // This alert is for debugging purposes only.
+                //alert('Nonce received! ' + nonce + ' ' + JSON.stringify(cardData));
+                
+                // Assign the value of the nonce to a hidden form element
+                var nonceField = document.getElementById('card-nonce');
+                nonceField.value = nonce;
+                
+                // Submit the form
+                document.getElementById('form').submit();
+              }
+            },
+            unsupportedBrowserDetected: function() {
+              // Alert the buyer that their browser is not supported
+            }
+          }
+        });
+        function submitButtonClick(event) {
+          event.preventDefault();
+          sqPaymentForm.requestCardNonce();
+        }
+      </script>
+      
+      <style type="text/css">
+        
+        .sq-input {
+        border: 1px solid #cccccc;
+        border-radius: 3px;
+        margin-bottom: 10px;
+        padding: 1px 4px;
+        position: relative;
+        top: 5px;
+        vertical-align: middle;
+        }
+        
+        .sq-input--focus {
+        outline-width: 2px;
+        outline-color: #70ACE9;
+        outline-offset: -1px;
+        outline-style: auto;
+        border-radius:3px;
+        }
+        .sq-input--error {
+        outline-width: 2px;
+        outline-color: #FF9393;
+        outline-offset: 0px;
+        outline-style: auto;
+        border-radius:3px;
+        }
+      </style>
+      
+      <?php
+      }
+	  
+	  // END SQUARE INSTALLATION
+    ?>
+</textarea>
+
+<b>3)</b> Go to <a class="highlight" href="https://squareup.com/us/en/developers" target="_blank">https://squareup.com/us/en/developers</a> and log in to your Square account.
+
+<b>4)</b> Click on "New Application", Choose an Application Name. Make sure it is relates to your website/web store as it will appear to your customers as well.
+
+<b>5)</b> Once you're done with creating the Application on Square website, go back to your store administration tool, go to Modules > Payments > Install Module and install Square Payments.
+
+<b>6)</b> Copy the information needed for the plugin from Square Developer website to your website.
+
+<b>7)</b> Once done, go back to <span class="highlight">Square Dashboard</span> (Where you check the stats), click on <span class="highlight">Account & Settings</span> then Locations, Click on the location that you want to use for your website. 
+
+<b>8)</b> In the <span class="highlight">URL Bar</span>, there is going to be a Unique Code after <span class="highlight">https:&sol;&sol;squareup.com&sol;dashboard&sol;locations&sol;</span> (As shown in the photo below)
+
+
+<span class="small">Photo:</span>
+<img src="https://i.imgur.com/lfLB5Vh.png" alt="URL Bar">
+<span class="small">In this case, the Location ID is XXXXXXXXXXXXX</span>
+
+
+<b>9)</b> Copy the Location ID (Unique to you!) in the Location ID field in the Administration Tool and click Save.
+
+<b>10)</b> That's it! Your installation is now complete.
+
+
+
+
+
+
+
+Thanks for coming!
+
+</pre>
+
+
+<span class="exitSignature">... another script developed by <a href="http://hichemkhayati.com/" target="_blank">Hichem Khayati</a> with <a href="http://www.theultracomputer.com/" target="_blank">The Ultra Computer, Inc.</a>
+</span>
+</body>
+</html>
