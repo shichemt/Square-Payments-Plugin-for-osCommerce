@@ -1,0 +1,6 @@
+[submodule "catalog/includes/classes/square-php-sdk"]
+	path = catalog/includes/classes/square-php-sdk
+	url = https://github.com/square/square-php-sdk
+[submodule "catalog/includes/classes/square"]
+	path = catalog/includes/classes/square
+	url = https://github.com/square/square-php-sdk
